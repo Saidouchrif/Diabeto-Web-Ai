@@ -272,7 +272,7 @@
                                 </div>
                                 <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun patient trouvé</h3>
                                 <p class="text-gray-500 mb-6">Commencez par ajouter votre premier patient</p>
-                                <a href="#" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:from-teal-700 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1">
+                                <a href="{{ route('patient.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:from-teal-700 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                     </svg>
@@ -324,7 +324,7 @@
                 <button onclick="closeDeleteModal()" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-300 transform hover:-translate-y-1">
                     Annuler
                 </button>
-                <form id="deleteForm" method="POST" action="{{route('patients.destroy',$patient->id_patient)}}" class="flex-1">
+                <form id="deleteForm" method="POST" action="{{route('patients.destroy',$patient->id_patient??"")}}" class="flex-1">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:-translate-y-1 shadow-lg">

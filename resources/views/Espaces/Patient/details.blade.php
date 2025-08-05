@@ -92,6 +92,12 @@
                 
                 <!-- Boutons d'action -->
                 <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="runAIAnalysis()" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 transform hover:-translate-y-1">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        Analyse AI
+                    </button>
                     <a href="{{ route('patients.edit', $patient->id_patient) }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -339,6 +345,94 @@
 
 </div>
 
+<!-- Modal d'analyse AI -->
+<div id="aiModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full transform transition-all duration-300 scale-95 opacity-0" id="aiModalContent">
+        <!-- En-tête de la modal -->
+        <div class="relative p-8 border-b border-gray-100">
+            <div class="flex items-center justify-center mb-6">
+                <div class="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                    <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 text-center mb-2">Analyse AI - Diagnostic Diabète</h3>
+            <p class="text-gray-600 text-center">Analyse intelligente des paramètres du patient {{ $patient->prenom }} {{ $patient->nom }}</p>
+        </div>
+
+        <!-- Contenu de la modal -->
+        <div class="p-8">
+            <!-- Écran de chargement -->
+            <div id="aiLoading" class="text-center py-12">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                    <svg class="w-8 h-8 text-purple-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </div>
+                <h4 class="text-xl font-semibold text-gray-900 mb-2">Analyse en cours...</h4>
+                <p class="text-gray-500">L'IA analyse les paramètres du patient pour évaluer le risque de diabète</p>
+            </div>
+
+            <!-- Résultats de l'analyse -->
+            <div id="aiResult" class="hidden">
+                <!-- Paramètres analysés -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-blue-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ $patient->glucose }}</div>
+                        <div class="text-sm text-blue-700">Glycémie (mg/dL)</div>
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ $patient->bmi }}</div>
+                        <div class="text-sm text-green-700">IMC (kg/m²)</div>
+                    </div>
+                    <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-yellow-600">{{ $patient->age }}</div>
+                        <div class="text-sm text-yellow-700">Âge (ans)</div>
+                    </div>
+                    <div class="bg-red-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-red-600">{{ $patient->blood_pressure }}</div>
+                        <div class="text-sm text-red-700">Pression (mmHg)</div>
+                    </div>
+                </div>
+
+                <!-- Résultat principal -->
+                <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-xl font-bold text-gray-900">Résultat de l'analyse AI</h4>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                                Score: <span id="aiRiskScore" class="font-bold">0/8</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">
+                            Risque <span id="aiRiskLevel" class="text-purple-800">Faible</span>
+                        </div>
+                        <p class="text-gray-600">Basé sur l'analyse des paramètres médicaux</p>
+                    </div>
+                </div>
+
+                <!-- Recommandations -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">📋 Recommandations AI</h4>
+                    <ul id="aiRecommendations" class="text-gray-700 space-y-2">
+                        <!-- Les recommandations seront ajoutées dynamiquement -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="flex justify-end mt-8">
+                <button onclick="closeAIModal()" class="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-300 transform hover:-translate-y-1">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de confirmation de suppression -->
 <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
@@ -496,6 +590,108 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeDeleteModal();
+        closeAIModal();
+    }
+});
+
+// Fonction pour l'analyse AI
+function runAIAnalysis() {
+    const modal = document.getElementById('aiModal');
+    const modalContent = document.getElementById('aiModalContent');
+    const loadingDiv = document.getElementById('aiLoading');
+    const resultDiv = document.getElementById('aiResult');
+    
+    // Afficher la modal avec animation
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    setTimeout(() => {
+        modalContent.style.transform = 'scale(1)';
+        modalContent.style.opacity = '1';
+    }, 10);
+    
+    // Simuler l'analyse AI
+    loadingDiv.classList.remove('hidden');
+    resultDiv.classList.add('hidden');
+    
+    // Simuler un délai d'analyse
+    setTimeout(() => {
+        loadingDiv.classList.add('hidden');
+        resultDiv.classList.remove('hidden');
+        
+        // Afficher le résultat basé sur les données du patient
+        const glucose = {{ $patient->glucose }};
+        const bmi = {{ $patient->bmi }};
+        const age = {{ $patient->age }};
+        const bloodPressure = {{ $patient->blood_pressure }};
+        
+        // Logique simple pour déterminer le risque
+        let riskScore = 0;
+        let riskLevel = '';
+        let recommendations = [];
+        
+        if (glucose > 126) riskScore += 3;
+        else if (glucose > 100) riskScore += 1;
+        
+        if (bmi > 30) riskScore += 2;
+        else if (bmi > 25) riskScore += 1;
+        
+        if (age > 45) riskScore += 1;
+        
+        if (bloodPressure > 140) riskScore += 2;
+        else if (bloodPressure > 130) riskScore += 1;
+        
+        if (riskScore >= 5) {
+            riskLevel = 'Élevé';
+            recommendations = [
+                'Consultation médicale urgente recommandée',
+                'Surveillance glycémique quotidienne',
+                'Modification du mode de vie immédiate',
+                'Tests de laboratoire complets'
+            ];
+        } else if (riskScore >= 3) {
+            riskLevel = 'Modéré';
+            recommendations = [
+                'Consultation médicale recommandée',
+                'Surveillance glycémique régulière',
+                'Amélioration de l\'alimentation',
+                'Activité physique régulière'
+            ];
+        } else {
+            riskLevel = 'Faible';
+            recommendations = [
+                'Maintenir un mode de vie sain',
+                'Contrôles préventifs annuels',
+                'Surveillance des facteurs de risque'
+            ];
+        }
+        
+        document.getElementById('aiRiskLevel').textContent = riskLevel;
+        document.getElementById('aiRiskScore').textContent = riskScore + '/8';
+        document.getElementById('aiRecommendations').innerHTML = recommendations.map(rec => `<li class="mb-2">• ${rec}</li>`).join('');
+        
+    }, 3000); // 3 secondes de simulation
+}
+
+// Fonction pour fermer la modal AI
+function closeAIModal() {
+    const modal = document.getElementById('aiModal');
+    const modalContent = document.getElementById('aiModalContent');
+    
+    // Animation de fermeture
+    modalContent.style.transform = 'scale(0.95)';
+    modalContent.style.opacity = '0';
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+// Fermer la modal AI en cliquant sur l'arrière-plan
+document.getElementById('aiModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAIModal();
     }
 });
 </script>
