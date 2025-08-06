@@ -57,9 +57,15 @@
                                 {{ $patient->prenom }} {{ $patient->nom }}
                             </h1>
                             @php
-                                $statusColor = $patient->result == 1 ? 'bg-red-100 text-red-800 border-red-300' : 'bg-green-100 text-green-800 border-green-300';
-                                $statusText = $patient->result == 1 ? 'Diabétique' : 'Non diabétique';
-                                $statusIcon = $patient->result == 1 ? '🔴' : '🟢';
+                                if(isset($lastPrediction) && $lastPrediction) {
+                                    $statusColor = $lastPrediction->result == 1 ? 'bg-red-100 text-red-800 border-red-300' : 'bg-green-100 text-green-800 border-green-300';
+                                    $statusText = $lastPrediction->result == 1 ? 'Diabétique' : 'Non diabétique';
+                                    $statusIcon = $lastPrediction->result == 1 ? '🔴' : '🟢';
+                                } else {
+                                    $statusColor = 'bg-gray-100 text-gray-800 border-gray-300';
+                                    $statusText = 'Aucune analyse AI';
+                                    $statusIcon = '❔';
+                                }
                             @endphp
                             <span class="ml-4 inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 {{ $statusColor }}">
                                 <span class="mr-2">{{ $statusIcon }}</span>
@@ -193,29 +199,42 @@
                 </div>
                 <h2 class="text-2xl font-bold text-gray-900">Diagnostic</h2>
             </div>
-            
             <div class="space-y-4">
-                <div class="text-center p-6 rounded-xl {{ $patient->result == 1 ? 'bg-red-50 border-2 border-red-200' : 'bg-green-50 border-2 border-green-200' }}">
-                    <div class="text-4xl mb-2">{{ $patient->result == 1 ? '🔴' : '🟢' }}</div>
-                    <h3 class="text-xl font-bold {{ $patient->result == 1 ? 'text-red-800' : 'text-green-800' }} mb-2">
-                        {{ $patient->result == 1 ? 'Diabétique' : 'Non diabétique' }}
-                    </h3>
-                    <p class="text-sm {{ $patient->result == 1 ? 'text-red-600' : 'text-green-600' }}">
-                        {{ $patient->result == 1 ? 'Risque de diabète détecté' : 'Aucun risque de diabète détecté' }}
-                    </p>
-                </div>
-                
+                @if(isset($lastPrediction) && $lastPrediction)
+                    <div class="text-center p-6 rounded-xl {{ $lastPrediction->result == 1 ? 'bg-red-50 border-2 border-red-200' : 'bg-green-50 border-2 border-green-200' }}">
+                        <div class="text-4xl mb-2">{{ $lastPrediction->result == 1 ? '🔴' : '🟢' }}</div>
+                        <h3 class="text-xl font-bold {{ $lastPrediction->result == 1 ? 'text-red-800' : 'text-green-800' }} mb-2">
+                            {{ $lastPrediction->result == 1 ? 'Diabétique' : 'Non diabétique' }}
+                        </h3>
+                        <p class="text-sm {{ $lastPrediction->result == 1 ? 'text-red-600' : 'text-green-600' }}">
+                            {{ $lastPrediction->result == 1 ? 'Risque de diabète détecté' : 'Aucun risque de diabète détecté' }}
+                        </p>
+                    </div>
+                @else
+                    <div class="text-center p-6 rounded-xl bg-gray-50 border-2 border-gray-200">
+                        <div class="text-4xl mb-2">❔</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">
+                            Aucune analyse AI disponible
+                        </h3>
+                        <p class="text-sm text-gray-600">Cliquez sur <b>Analyse AI</b> pour obtenir un diagnostic.</p>
+                        <button onclick="runAIAnalysis()" class="mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 transform hover:-translate-y-1">
+                            Lancer l'analyse AI
+                        </button>
+                    </div>
+                @endif
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h4 class="font-semibold text-gray-900 mb-2">Recommandations</h4>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        @if($patient->result == 1)
+                        @if(isset($lastPrediction) && $lastPrediction && $lastPrediction->result == 1)
                             <li>• Surveillance glycémique régulière</li>
                             <li>• Consultation médicale recommandée</li>
                             <li>• Adaptation du mode de vie</li>
-                        @else
+                        @elseif(isset($lastPrediction) && $lastPrediction)
                             <li>• Maintenir un mode de vie sain</li>
                             <li>• Contrôles préventifs annuels</li>
                             <li>• Surveillance des facteurs de risque</li>
+                        @else
+                            <li>Aucune recommandation disponible. Lancez une analyse AI.</li>
                         @endif
                     </ul>
                 </div>
@@ -314,16 +333,16 @@
                     @foreach($patient->predictions->take(5) as $prediction)
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                             <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-full {{ $prediction->result == 1 ? 'bg-red-500' : 'bg-green-500' }} mr-3"></div>
+                                <div class="w-3 h-3 rounded-full {{ $prediction->result == "1" ? 'bg-red-500' : 'bg-green-500' }} mr-3"></div>
                                 <div>
                                     <p class="font-medium text-gray-900">
-                                        {{ $prediction->result == 1 ? 'Risque diabétique' : 'Pas de risque' }}
+                                        {{ $prediction->result == "1" ? 'Risque diabétique' : 'Pas de risque' }}
                                     </p>
                                     <p class="text-sm text-gray-500">{{ $prediction->created_at->format('d/m/Y H:i') }}</p>
                                 </div>
                             </div>
-                            <span class="text-sm font-semibold {{ $prediction->result == 1 ? 'text-red-600' : 'text-green-600' }}">
-                                {{ $prediction->result == 1 ? 'Positif' : 'Négatif' }}
+                            <span class="text-sm font-semibold {{ $prediction->result == "1" ? 'text-red-600' : 'text-green-600' }}">
+                                {{ $prediction->result == "1" ? 'Positif' : 'Négatif' }}
                             </span>
                         </div>
                     @endforeach
@@ -413,6 +432,19 @@
                         <p class="text-gray-600">Basé sur l'analyse des paramètres médicaux</p>
                     </div>
                 </div>
+
+                <!-- Résultat de la dernière prédiction enregistrée -->
+                @if(isset($lastPrediction) && $lastPrediction)
+                <div class="bg-white border border-green-200 rounded-xl p-4 mb-4 text-center">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Résultat sauvegardé</h4>
+                    <span class="text-xl font-bold {{ $lastPrediction->result == "1" ? 'text-red-600' : 'text-green-600' }}">
+                        {{ $lastPrediction->result == "1" ? 'Diabétique' : 'Non diabétique' }}
+                    </span>
+                    <div class="text-sm text-gray-500 mt-1">
+                        Prédiction enregistrée le {{ $lastPrediction->created_at->format('d/m/Y H:i') }}
+                    </div>
+                </div>
+                @endif
 
                 <!-- Recommandations -->
                 <div class="bg-white border border-gray-200 rounded-xl p-6">
@@ -610,67 +642,101 @@ function runAIAnalysis() {
         modalContent.style.opacity = '1';
     }, 10);
     
-    // Simuler l'analyse AI
+    // Afficher l'écran de chargement
     loadingDiv.classList.remove('hidden');
     resultDiv.classList.add('hidden');
     
-    // Simuler un délai d'analyse
-    setTimeout(() => {
-        loadingDiv.classList.add('hidden');
-        resultDiv.classList.remove('hidden');
-        
-        // Afficher le résultat basé sur les données du patient
-        const glucose = {{ $patient->glucose }};
-        const bmi = {{ $patient->bmi }};
-        const age = {{ $patient->age }};
-        const bloodPressure = {{ $patient->blood_pressure }};
-        
-        // Logique simple pour déterminer le risque
-        let riskScore = 0;
-        let riskLevel = '';
-        let recommendations = [];
-        
-        if (glucose > 126) riskScore += 3;
-        else if (glucose > 100) riskScore += 1;
-        
-        if (bmi > 30) riskScore += 2;
-        else if (bmi > 25) riskScore += 1;
-        
-        if (age > 45) riskScore += 1;
-        
-        if (bloodPressure > 140) riskScore += 2;
-        else if (bloodPressure > 130) riskScore += 1;
-        
-        if (riskScore >= 5) {
-            riskLevel = 'Élevé';
-            recommendations = [
-                'Consultation médicale urgente recommandée',
-                'Surveillance glycémique quotidienne',
-                'Modification du mode de vie immédiate',
-                'Tests de laboratoire complets'
-            ];
-        } else if (riskScore >= 3) {
-            riskLevel = 'Modéré';
-            recommendations = [
-                'Consultation médicale recommandée',
-                'Surveillance glycémique régulière',
-                'Amélioration de l\'alimentation',
-                'Activité physique régulière'
-            ];
-        } else {
-            riskLevel = 'Faible';
-            recommendations = [
-                'Maintenir un mode de vie sain',
-                'Contrôles préventifs annuels',
-                'Surveillance des facteurs de risque'
-            ];
-        }
-        
-        document.getElementById('aiRiskLevel').textContent = riskLevel;
-        document.getElementById('aiRiskScore').textContent = riskScore + '/8';
-        document.getElementById('aiRecommendations').innerHTML = recommendations.map(rec => `<li class="mb-2">• ${rec}</li>`).join('');
-        
-    }, 3000); // 3 secondes de simulation
+    // Appeler l'API Laravel qui communique avec l'API Python
+    fetch('{{ route("patients.predict", $patient->id_patient) }}')
+        .then(response => response.json())
+        .then(data => {
+            // Masquer le chargement et afficher les résultats
+            loadingDiv.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            
+            if (data.success) {
+                // Utiliser les données de l'API Python
+                const apiData = data.data;
+                const patient = data.patient;
+                
+                // Déterminer le niveau de risque basé sur le cluster
+                let riskLevel = '';
+                let riskScore = 0;
+                let recommendations = [];
+                
+                // Mapping des clusters vers les niveaux de risque
+                const clusterRiskMapping = {
+                    0: { level: 'Faible', score: 2, color: 'green' },
+                    1: { level: 'Élevé', score: 7, color: 'red' },
+                    2: { level: 'Modéré', score: 4, color: 'yellow' },
+                    3: { level: 'Élevé', score: 8, color: 'red' },
+                    4: { level: 'Modéré', score: 5, color: 'orange' }
+                };
+                
+                const clusterInfo = clusterRiskMapping[apiData.cluster] || { level: 'Inconnu', score: 0, color: 'gray' };
+                
+                // Définir les recommandations basées sur le niveau de risque
+                if (clusterInfo.level === 'Élevé') {
+                    recommendations = [
+                        'Consultation médicale urgente recommandée',
+                        'Surveillance glycémique quotidienne',
+                        'Modification du mode de vie immédiate',
+                        'Tests de laboratoire complets',
+                        'Suivi médical régulier'
+                    ];
+                } else if (clusterInfo.level === 'Modéré') {
+                    recommendations = [
+                        'Consultation médicale recommandée',
+                        'Surveillance glycémique régulière',
+                        'Amélioration de l\'alimentation',
+                        'Activité physique régulière',
+                        'Contrôles préventifs'
+                    ];
+                } else {
+                    recommendations = [
+                        'Maintenir un mode de vie sain',
+                        'Contrôles préventifs annuels',
+                        'Surveillance des facteurs de risque',
+                        'Alimentation équilibrée',
+                        'Activité physique modérée'
+                    ];
+                }
+                
+                // Mettre à jour l'affichage
+                document.getElementById('aiRiskLevel').textContent = clusterInfo.level;
+                document.getElementById('aiRiskScore').textContent = clusterInfo.score + '/8';
+                document.getElementById('aiRecommendations').innerHTML = recommendations.map(rec => `<li class="mb-2">• ${rec}</li>`).join('');
+                
+                // Mettre à jour les paramètres affichés
+                document.querySelector('.bg-blue-50 .text-2xl').textContent = patient.glucose;
+                document.querySelector('.bg-green-50 .text-2xl').textContent = patient.bmi;
+                document.querySelector('.bg-yellow-50 .text-2xl').textContent = patient.age;
+                document.querySelector('.bg-red-50 .text-2xl').textContent = patient.pedigree;
+                
+            } else {
+                // En cas d'erreur, afficher un message d'erreur
+                document.getElementById('aiRiskLevel').textContent = 'Erreur';
+                document.getElementById('aiRiskScore').textContent = 'N/A';
+                document.getElementById('aiRecommendations').innerHTML = `
+                    <li class="mb-2 text-red-600">• Erreur de connexion à l'API</li>
+                    <li class="mb-2 text-red-600">• Vérifiez que l'API Python est démarrée</li>
+                    <li class="mb-2 text-red-600">• Contactez l'administrateur</li>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            loadingDiv.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            
+            document.getElementById('aiRiskLevel').textContent = 'Erreur';
+            document.getElementById('aiRiskScore').textContent = 'N/A';
+            document.getElementById('aiRecommendations').innerHTML = `
+                <li class="mb-2 text-red-600">• Erreur de connexion à l'API</li>
+                <li class="mb-2 text-red-600">• Vérifiez que l'API Python est démarrée</li>
+                <li class="mb-2 text-red-600">• Contactez l'administrateur</li>
+            `;
+        });
 }
 
 // Fonction pour fermer la modal AI

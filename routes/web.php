@@ -37,3 +37,7 @@ Route::delete('/home/medciane/delete/{id}',[PatientController::class,'destroy'])
 Route::get('/home/medciane/details/{id}',[PatientController::class,'show'])->name('patients.show')->middleware('auth');
 Route::get('/home/medciane/edit/{id}',[PatientController::class,'edit'])->name('patients.edit')->middleware('auth');
 Route::put('/home/medciane/update/{id}',[PatientController::class,'update'])->name('patients.update')->middleware('auth');
+
+// Routes pour l'API AI
+Route::get('/home/medciane/predict/{id}',[PatientController::class,'predictWithAI'])->name('patients.predict')->middleware('auth');
+Route::get('/home/medciane/predict-curl/{id}',[PatientController::class,'predictWithAICurl'])->name('patients.predict.curl')->middleware('auth');
