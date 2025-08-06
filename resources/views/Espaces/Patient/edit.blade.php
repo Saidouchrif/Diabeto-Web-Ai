@@ -185,15 +185,19 @@
                         @enderror
                     </div>
 
-                    <!-- IMC -->
+                    <!-- BMI -->
                     <div class="group">
-                        <label for="bmi" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-purple-600 transition-colors duration-300">
-                            IMC (kg/m²) <span class="text-red-500">*</span>
+                        <label for="bmi" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-blue-600 transition-colors duration-300">
+                            BMI (kg/m²) <span class="text-red-500">*</span>
                         </label>
-                        <input type="number" id="bmi" name="bmi" value="{{ old('bmi', $patient->bmi) }}" required min="0" max="100"
-                               placeholder="Ex: 25"
-                               class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-400 transition-all duration-300 group-hover:border-purple-300">
-                        <p class="text-xs text-gray-500 mt-1">Valeurs normales: 18.5-24.9 kg/m²</p>
+                        <div class="relative">
+                            <input type="number" id="bmi" name="bmi" value="{{ old('bmi', $patient->bmi) }}" required step="0.1" min="0"
+                                   placeholder="Ex: 25.3"
+                                   class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm">kg/m²</span>
+                            </div>
+                        </div>
                         @error('bmi')
                             <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                         @enderror
@@ -213,32 +217,15 @@
                         @enderror
                     </div>
 
-                    <!-- Historique familial -->
+                    <!-- Historique familial (Pedigree) -->
                     <div class="group">
-                        <label for="pedigree" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                        <label for="pedigree" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-blue-600 transition-colors duration-300">
                             Historique familial <span class="text-red-500">*</span>
                         </label>
-                        <input type="number" id="pedigree" name="pedigree" value="{{ old('pedigree', $patient->pedigree) }}" required min="0" max="10"
-                               placeholder="Ex: 2"
-                               class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-400 transition-all duration-300 group-hover:border-purple-300">
-                        <p class="text-xs text-gray-500 mt-1">Nombre de parents diabétiques (0-10)</p>
+                        <input type="number" id="pedigree" name="pedigree" value="{{ old('pedigree', $patient->pedigree) }}" required min="0" step="0.01"
+                               placeholder="Ex: 0, 0.5, 1.2"
+                               class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300">
                         @error('pedigree')
-                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Résultat -->
-                    <div class="group">
-                        <label for="result" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-purple-600 transition-colors duration-300">
-                            Diagnostic <span class="text-red-500">*</span>
-                        </label>
-                        <select id="result" name="result" required
-                                class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-400 transition-all duration-300 group-hover:border-purple-300">
-                            <option value="">Sélectionner le diagnostic</option>
-                            <option value="0" {{ (old('result', $patient->result) == '0') ? 'selected' : '' }}>🟢 Non diabétique</option>
-                            <option value="1" {{ (old('result', $patient->result) == '1') ? 'selected' : '' }}>🔴 Diabétique</option>
-                        </select>
-                        @error('result')
                             <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
@@ -394,11 +381,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputs = document.querySelectorAll('input[type="number"]');
     inputs.forEach(input => {
         input.addEventListener('input', function() {
-            const value = parseInt(this.value);
-            const min = parseInt(this.min);
-            const max = parseInt(this.max);
+            const value = parseFloat(this.value); // Utiliser parseFloat pour les nombres à virgule
+            const min = parseFloat(this.min);
+            const max = parseFloat(this.max);
             
-            if (value < min || value > max) {
+            if (isNaN(value) || value < min || value > max) {
                 this.classList.add('border-red-400', 'focus:border-red-400', 'focus:ring-red-100');
                 this.classList.remove('border-gray-200', 'focus:border-blue-400', 'focus:ring-blue-100');
             } else {

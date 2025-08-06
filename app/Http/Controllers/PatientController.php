@@ -16,7 +16,8 @@ class PatientController extends Controller
     public function index()
     {
         $medecin=Auth::user();
-        $patients=Patient::where('id_medecin',$medecin->id)->get();
+        $patients=Patient::with('predictions')->where('id_medecin',$medecin->id)->get();
+
         return view('Espaces.Patient.Patients',compact('patients'));
     }
 
@@ -40,11 +41,10 @@ class PatientController extends Controller
             'prenom'=>'required|string|max:255',
             'sexe'=>'required|string|max:255',
             'age'=>'required|integer',
-            'glucose'=>'required|integer',
-            'bmi'=>'required|integer',
-            'blood_pressure'=>'required|integer',
-            'pedigree'=>'required|integer',
-            'result'=>'required|integer',
+            'glucose'=>'required|numeric',
+            'bmi'=>'required|numeric',
+            'blood_pressure'=>'required|numeric',
+            'pedigree'=>'required|numeric',
             'id_medecin'=>'required|integer|exists:users,id',
         ],[
             'nom.required'=>'Le nom est requis',
@@ -86,11 +86,10 @@ class PatientController extends Controller
             'prenom'=>'required|string|max:255',
             'sexe'=>'required|string|max:255',
             'age'=>'required|integer',
-            'glucose'=>'required|integer',
-            'bmi'=>'required|integer',
-            'blood_pressure'=>'required|integer',
-            'pedigree'=>'required|integer',
-            'result'=>'required|integer',
+            'glucose'=>'required|numeric',
+            'bmi'=>'required|numeric',
+            'blood_pressure'=>'required|numeric',
+            'pedigree'=>'required|numeric',
             'id_medecin'=>'required|integer|exists:users,id',
         ],[
             'nom.required'=>'Le nom est requis',

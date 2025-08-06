@@ -10,7 +10,7 @@ class Patient extends Model
     use HasFactory;
     protected $primaryKey = 'id_patient';
     protected $table = 'patients';
-    protected $fillable = ['nom', 'prenom', 'sexe', 'age', 'glucose', 'bmi','blood_pressure','pedigree','result','id_medecin'];
+    protected $fillable = ['nom', 'prenom', 'sexe', 'age', 'glucose', 'bmi','blood_pressure','pedigree','id_medecin'];
     public function medecin()
 {
     return $this->belongsTo(User::class, 'id_medecin','id');

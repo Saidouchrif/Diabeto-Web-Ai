@@ -202,6 +202,7 @@
                         <th class="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">👤 Prénom</th>
                         <th class="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">👥 Sexe</th>
                         <th class="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">🎂 Âge</th>
+                        <th class="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">🩺 Diagnostic</th>
                         <th class="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">⚡ Actions</th>
                     </tr>
                 </thead>
@@ -236,6 +237,24 @@
                                 </svg>
                                 <span class="text-lg font-semibold text-gray-900 group-hover:text-teal-700 transition-colors duration-300">{{ $patient->age ?? 'N/A' }} ans</span>
                             </div>
+                        </td>
+                        <td class="px-8 py-6 whitespace-nowrap">
+                            @php
+                                $lastPrediction = $patient->predictions->sortByDesc('created_at')->first();
+                                if($lastPrediction) {
+                                    $diagColor = $lastPrediction->result == 1 ? 'bg-red-100 text-red-800 border-red-300' : 'bg-green-100 text-green-800 border-green-300';
+                                    $diagText = $lastPrediction->result == 1 ? 'Diabétique' : 'Non diabétique';
+                                    $diagIcon = $lastPrediction->result == 1 ? '🔴' : '🟢';
+                                } else {
+                                    $diagColor = 'bg-gray-100 text-gray-700 border-gray-300';
+                                    $diagText = 'Non analysé';
+                                    $diagIcon = '❔';
+                                }
+                            @endphp
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 {{ $diagColor }}">
+                                <span class="mr-2">{{ $diagIcon }}</span>
+                                {{ $diagText }}
+                            </span>
                         </td>
                         <td class="px-8 py-6 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-3">

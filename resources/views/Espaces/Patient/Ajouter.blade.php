@@ -150,7 +150,7 @@
                     <!-- BMI -->
                     <div class="group">
                         <label for="bmi" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-blue-600 transition-colors duration-300">
-                            IMC (kg/m²) <span class="text-red-500">*</span>
+                            BMI (kg/m²) <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <input type="number" id="bmi" name="bmi" value="{{ old('bmi') }}" required step="0.1" min="0"
@@ -183,18 +183,14 @@
                         @enderror
                     </div>
 
-                    <!-- Pedigree -->
+                    <!-- Historique familial (Pedigree) -->
                     <div class="group">
                         <label for="pedigree" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-blue-600 transition-colors duration-300">
-                            Pedigree <span class="text-red-500">*</span>
+                            Historique familial <span class="text-red-500">*</span>
                         </label>
-                        <select id="pedigree" name="pedigree" required
-                                class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300">
-                            <option value="">Sélectionner le pedigree</option>
-                            <option value="0" {{ old('pedigree') == '0' ? 'selected' : '' }}>0 - Aucun antécédent</option>
-                            <option value="1" {{ old('pedigree') == '1' ? 'selected' : '' }}>1 - Antécédent familial</option>
-                            <option value="2" {{ old('pedigree') == '2' ? 'selected' : '' }}>2 - Antécédents multiples</option>
-                        </select>
+                        <input type="number" id="pedigree" name="pedigree" value="{{ old('pedigree') }}" required min="0" step="0.01"
+                               placeholder="Ex: 0, 0.5, 1.2"
+                               class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300">
                         @error('pedigree')
                             <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
                         @enderror
@@ -203,31 +199,7 @@
             </div>
 
             <!-- Résultat du diagnostic -->
-            <div class="mb-8">
-                <div class="flex items-center mb-6">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mr-4">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900">🔍 Résultat du diagnostic</h2>
-                </div>
-                
-                <div class="group">
-                    <label for="result" class="block text-sm font-semibold text-gray-700 mb-3 group-hover:text-green-600 transition-colors duration-300">
-                        Résultat <span class="text-red-500">*</span>
-                    </label>
-                    <select id="result" name="result" required
-                            class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-100 focus:border-green-400 transition-all duration-300 group-hover:border-green-300">
-                        <option value="">Sélectionner le résultat</option>
-                        <option value="0" {{ old('result') == '0' ? 'selected' : '' }}>🟢 0 - Non diabétique</option>
-                        <option value="1" {{ old('result') == '1' ? 'selected' : '' }}>🔴 1 - Diabétique</option>
-                    </select>
-                    @error('result')
-                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
+            {{-- Champ résultat supprimé car il n'est plus utilisé --}}
 
             <!-- Boutons d'action -->
             <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
@@ -260,7 +232,7 @@
                 <h3 class="text-lg font-semibold text-blue-800 mb-2">💡 Conseils pour remplir le formulaire</h3>
                 <ul class="text-blue-700 space-y-1 text-sm">
                     <li>• <strong>Glucose :</strong> Valeur normale entre 70-140 mg/dL</li>
-                    <li>• <strong>IMC :</strong> Normal entre 18.5-24.9 kg/m²</li>
+                    <li>• <strong>BMI :</strong> Normal entre 18.5-24.9 kg/m²</li>
                     <li>• <strong>Pression artérielle :</strong> Format "systolique/diastolique" (ex: 120/80)</li>
                     <li>• <strong>Pedigree :</strong> 0=aucun antécédent, 1=antécédent familial, 2=antécédents multiples</li>
                     <li>• <strong>Résultat :</strong> 0=non diabétique, 1=diabétique</li>
