@@ -97,13 +97,13 @@
             <div class="flex items-center">
                 <div class="p-4 bg-gradient-to-br from-green-100 to-green-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Stables</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('status', 'stable')->count() }}</p>
-                    <p class="text-xs text-green-600 font-medium">76% du total</p>
+                    <p class="text-sm font-medium text-gray-600">Répartition par sexe</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('sexe', 'M')->count() }}/{{ $patients->where('sexe', 'F')->count() }}</p>
+                    <p class="text-xs text-green-600 font-medium">Hommes/Femmes</p>
                 </div>
             </div>
         </div>
@@ -112,13 +112,29 @@
             <div class="flex items-center">
                 <div class="p-4 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">À surveiller</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('status', 'surveillance')->count() }}</p>
-                    <p class="text-xs text-yellow-600 font-medium">17% du total</p>
+                    <p class="text-sm font-medium text-gray-600">Diagnostic</p>
+                    <p class="text-3xl font-bold text-gray-900">
+                        @php
+                            $diabetiques = 0;
+                            $nonDiabetiques = 0;
+                            foreach($patients as $patient) {
+                                $lastPrediction = $patient->predictions->sortByDesc('created_at')->first();
+                                if($lastPrediction) {
+                                    if($lastPrediction->result == 1) {
+                                        $diabetiques++;
+                                    } else {
+                                        $nonDiabetiques++;
+                                    }
+                                }
+                            }
+                        @endphp
+                        {{ $diabetiques }}/{{ $nonDiabetiques }}
+                    </p>
+                    <p class="text-xs text-yellow-600 font-medium">Diabétique/Non diabétique</p>
                 </div>
             </div>
         </div>
@@ -127,13 +143,24 @@
             <div class="flex items-center">
                 <div class="p-4 bg-gradient-to-br from-red-100 to-red-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Critiques</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('status', 'critique')->count() }}</p>
-                    <p class="text-xs text-red-600 font-medium">7% du total</p>
+                    <p class="text-sm font-medium text-gray-600">Sans diagnostic</p>
+                    <p class="text-3xl font-bold text-gray-900">
+                        @php
+                            $sansDiagnostic = 0;
+                            foreach($patients as $patient) {
+                                $lastPrediction = $patient->predictions->sortByDesc('created_at')->first();
+                                if(!$lastPrediction) {
+                                    $sansDiagnostic++;
+                                }
+                            }
+                        @endphp
+                        {{ $sansDiagnostic }}
+                    </p>
+                    <p class="text-xs text-red-600 font-medium">Pas d'analyse AI</p>
                 </div>
             </div>
         </div>
