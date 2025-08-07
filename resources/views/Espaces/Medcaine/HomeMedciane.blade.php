@@ -60,6 +60,7 @@
 
     <!-- Statistiques rapides avec animations -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total patients -->
         <div class="group bg-white rounded-2xl shadow-lg p-6 border-l-4 border-teal-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
             <div class="flex items-center">
                 <div class="p-4 bg-gradient-to-br from-teal-100 to-teal-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -68,54 +69,81 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Patients actifs</p>
+                    <p class="text-sm font-medium text-gray-600">Total patients</p>
                     <p class="text-3xl font-bold text-gray-900">{{ $patients->count() ?? 0 }}</p>
-                    <p class="text-xs text-teal-600 font-medium">Total patients</p>
+                    <p class="text-xs text-teal-600 font-medium">+12% ce mois</p>
                 </div>
             </div>
         </div>
-
-        <div class="group bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-            <div class="flex items-center">
-                <div class="p-4 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Rendez-vous aujourd'hui</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('status', 'active')->count() ?? 0 }}</p>
-                    <p class="text-xs text-blue-600 font-medium">Patients actifs</p>
-                </div>
-            </div>
-        </div>
-
+        <!-- Répartition par sexe -->
         <div class="group bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
             <div class="flex items-center">
                 <div class="p-4 bg-gradient-to-br from-green-100 to-green-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Répartition par sexe</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('sexe', 'M')->count() }}/{{ $patients->where('sexe', 'F')->count() }}</p>
+                    <p class="text-xs text-green-600 font-medium">Hommes/Femmes</p>
+                </div>
+            </div>
+        </div>
+        <!-- Diagnostic -->
+        <div class="group bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+            <div class="flex items-center">
+                <div class="p-4 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Stable</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('status', 'stable')->count() ?? 0 }}</p>
-                    <p class="text-xs text-green-600 font-medium">Glycémie stable</p>
+                    <p class="text-sm font-medium text-gray-600">Diagnostic</p>
+                    <p class="text-3xl font-bold text-gray-900">
+                        @php
+                            $diabetiques = 0;
+                            $nonDiabetiques = 0;
+                            foreach($patients as $patient) {
+                                $lastPrediction = $patient->predictions->sortByDesc('created_at')->first();
+                                if($lastPrediction) {
+                                    if($lastPrediction->result == 1) {
+                                        $diabetiques++;
+                                    } else {
+                                        $nonDiabetiques++;
+                                    }
+                                }
+                            }
+                        @endphp
+                        {{ $diabetiques }}/{{ $nonDiabetiques }}
+                    </p>
+                    <p class="text-xs text-yellow-600 font-medium">Diabétique/Non diabétique</p>
                 </div>
             </div>
         </div>
-
-        <div class="group bg-white rounded-2xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+        <!-- Sans diagnostic -->
+        <div class="group bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
             <div class="flex items-center">
-                <div class="p-4 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <div class="p-4 bg-gradient-to-br from-red-100 to-red-200 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">En attente</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $patients->where('status', 'pending')->count() ?? 0 }}</p>
-                    <p class="text-xs text-orange-600 font-medium">Nécessitent attention</p>
+                    <p class="text-sm font-medium text-gray-600">Sans diagnostic</p>
+                    <p class="text-3xl font-bold text-gray-900">
+                        @php
+                            $sansDiagnostic = 0;
+                            foreach($patients as $patient) {
+                                $lastPrediction = $patient->predictions->sortByDesc('created_at')->first();
+                                if(!$lastPrediction) {
+                                    $sansDiagnostic++;
+                                }
+                            }
+                        @endphp
+                        {{ $sansDiagnostic }}
+                    </p>
+                    <p class="text-xs text-red-600 font-medium">Pas d'analyse AI</p>
                 </div>
             </div>
         </div>
