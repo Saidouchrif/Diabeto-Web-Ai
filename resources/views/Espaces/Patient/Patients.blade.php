@@ -167,43 +167,50 @@
     </div>
 
     <!-- Filtres et recherche améliorés -->
-    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Recherche avec animation -->
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-3">🔍 Rechercher un patient</label>
-                <div class="relative group">
-                    <input type="text" placeholder="Nom, prénom ou numéro de dossier..." 
-                           class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-400 transition-all duration-300 group-hover:border-teal-300">
-                    <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-teal-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+    <form method="GET" action="{{ route('patients.index') }}">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Recherche avec animation -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">🔍 Rechercher un patient</label>
+                    <div class="relative group">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, prénom ou numéro de dossier..." 
+                               class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-400 transition-all duration-300 group-hover:border-teal-300">
+                        <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-teal-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Filtre par date exacte -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">📅 Dernière visite</label>
+                    <input type="date" name="date_exacte" value="{{ request('date_exacte') }}" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-400 transition-all duration-300 hover:border-teal-300">
+                </div>
+
+                <!-- Filtre par diagnostic -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">🩺 Diagnostic</label>
+                    <select name="diagnostic" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-400 transition-all duration-300 hover:border-teal-300">
+                        <option value="">Tous les diagnostics</option>
+                        <option value="diabetique" {{ request('diagnostic') == 'diabetique' ? 'selected' : '' }}>🔴 Diabétique</option>
+                        <option value="nondiabetique" {{ request('diagnostic') == 'nondiabetique' ? 'selected' : '' }}>🟢 Non diabétique</option>
+                        <option value="sans" {{ request('diagnostic') == 'sans' ? 'selected' : '' }}>❔ Sans diagnostic</option>
+                    </select>
+                </div>
+
+                <!-- Bouton filtrer -->
+                <div class="flex items-end">
+                    <button type="submit" class="w-full px-6 py-4 bg-gradient-to-r from-teal-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:from-teal-700 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                        </svg>
+                        Filtrer
+                    </button>
                 </div>
             </div>
-
-            <!-- Filtre par statut -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">📊 Statut</label>
-                <select class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-400 transition-all duration-300 hover:border-teal-300">
-                    <option value="">Tous les statuts</option>
-                    <option value="stable">🟢 Stable</option>
-                    <option value="surveillance">🟡 À surveiller</option>
-                    <option value="critique">🔴 Critique</option>
-                </select>
-            </div>
-
-            <!-- Filtre par date -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">📅 Dernière visite</label>
-                <select class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-400 transition-all duration-300 hover:border-teal-300">
-                    <option value="">Toutes les dates</option>
-                    <option value="7">7 derniers jours</option>
-                    <option value="30">30 derniers jours</option>
-                    <option value="90">3 derniers mois</option>
-                </select>
-            </div>
         </div>
-    </div>
+    </form>
 
     <!-- Liste des patients avec design amélioré -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">

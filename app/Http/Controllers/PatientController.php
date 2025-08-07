@@ -17,8 +17,46 @@ class PatientController extends Controller
     {
         $medecin=Auth::user();
         $patients=Patient::with('predictions')->where('id_medecin',$medecin->id)->get();
-
-        return view('Espaces.Patient.Patients',compact('patients'));
+        $diagnostic = request('diagnostic');
+        if ($diagnostic === 'diabetique') {
+            $patients = $patients->filter(function($patient) {
+                $last = $patient->predictions->sortByDesc('created_at')->first();
+                return $last && $last->result == 1;
+            });
+        } elseif ($diagnostic === 'nondiabetique') {
+            $patients = $patients->filter(function($patient) {
+                $last = $patient->predictions->sortByDesc('created_at')->first();
+                return $last && $last->result == 0;
+            });
+        } elseif ($diagnostic === 'sans') {
+            $patients = $patients->filter(function($patient) {
+                $last = $patient->predictions->sortByDesc('created_at')->first();
+                return !$last;
+            });
+        }
+        $search = request('search');
+        if ($search) {
+            $patients = $patients->filter(function($patient) use ($search) {
+                return stripos($patient->nom, $search) !== false || stripos($patient->prenom, $search) !== false;
+            });
+        }
+        $date = request('date');
+        $date_exacte = request('date_exacte');
+        if ($date_exacte) {
+            $patients = $patients->filter(function($patient) use ($date_exacte) {
+                $last = $patient->predictions->sortByDesc('created_at')->first();
+                if(!$last) return false;
+                return \Carbon\Carbon::parse($last->created_at)->format('Y-m-d') === $date_exacte;
+            });
+        } else if (in_array($date, ['7','30','90'])) {
+            $days = (int)$date;
+            $patients = $patients->filter(function($patient) use ($days) {
+                $last = $patient->predictions->sortByDesc('created_at')->first();
+                if(!$last) return false;
+                return \Carbon\Carbon::parse($last->created_at)->gt(now()->subDays($days));
+            });
+        }
+        return view('Espaces.Patient.Patients',compact('patients','diagnostic'));
     }
 
     /**
